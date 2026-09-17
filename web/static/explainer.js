@@ -1,9 +1,9 @@
-/* 시스템 설명 오버레이 — README(설계 문서)를 흐름 그림으로 옮긴 8단계 워크스루.
+/* 시스템 설명 오버레이 — README(설계 문서, v3)를 흐름 그림으로 옮긴 10단계 워크스루.
    CDN·라이브러리 없이 HTML/CSS/SVG만 쓴다(허브 파드에서 외부 요청 없이 떠야 하므로).
    내용의 근거는 README.md 각 장이며, 수치·규칙 ID는 database/ 의 실제 행을 인용한다. */
 
 (function () {
-  const SEEN_KEY = "f1_guide_seen_v1";
+  const SEEN_KEY = "f1_guide_seen_v3";
 
   /* ── 단계 정의 ───────────────────────────────────────────────────────
      kicker: 상단 라벨 · title: 제목 · lead: 도입 문단 · art: 그림 · note: 마무리 강조 */
@@ -15,8 +15,8 @@
       lead: `새로운 약 하나를 세상에 내놓기까지 보통 <b>10년 이상, 수조 원</b>이 든다.
              약효를 내는 주성분을 찾아도 끝이 아니다. 사람이 삼킬 수 있는 형태 —
              정제·캡슐·시럽 — 로 만들어야 비로소 약이 되고, 이 단계를
-             <b>제형(製劑) 설계</b>라고 부른다. 주성분 하나로는 알약이 굳지 않으니
-             여러 첨가제(부형제)를 섞는데, <b>바로 그 조합에서 사고가 난다.</b>`,
+             <b>제형(製劑) 설계</b>라고 부른다. 주성분 하나로는 알약이 굳지 않고 잘 녹지도 않으니
+             첨가제를 섞고 녹이는 전략을 고르는데, <b>바로 그 선택에서 사고가 난다.</b>`,
       art: `
         <div class="f1-timeline f1-seq">
           <div class="f1-tl">후보물질 발굴<small>수천 개 중 극소수</small></div>
@@ -28,14 +28,14 @@
         <div class="f1-fails f1-seq">
           <div class="f1-box f1-fail"><b><span class="f1-emoji">⚗️</span>화학적 충돌</b>
             <span>주성분과 첨가제가 반응해 약이 갈변하거나 분해된다</span></div>
-          <div class="f1-box f1-fail"><b><span class="f1-emoji">🏭</span>공정 실패</b>
-            <span>가루를 눌러 알약으로 찍을 때 부서지거나 기계에 들러붙는다</span></div>
+          <div class="f1-box f1-fail"><b><span class="f1-emoji">💧</span>전략 오판</b>
+            <span>녹는 속도가 문제인 약에 녹는 양을 올리는 비싼 공정을 쓰거나, 그 반대를 한다</span></div>
           <div class="f1-box f1-fail"><b><span class="f1-emoji">📕</span>규제 초과</b>
             <span>나라별 첨가제 상한을 넘긴다. 어린이용은 기준이 훨씬 엄격하다</span></div>
         </div>`,
       note: `지금까지 제약 현장은 이 문제를 <b>실험실에서 직접 만들어 보고, 실패하면 다시 설계하는</b>
              방식으로 풀었다. 한 번의 실험에 드는 시간과 비용이 크고, 그 시행착오를 수십 번 반복한다.
-             이 값비싼 시행착오를 실험실이 아니라 <b>컴퓨터 안에서 미리 끝내자</b>는 것이 출발점이다.`,
+             이 시행착오를 <b>컴퓨터 안에서 최대한 미리 끝내고, 꼭 필요한 실험만 골라 요청하자</b>는 것이 출발점이다.`,
     },
 
     {
@@ -45,52 +45,53 @@
       lead: `"AI가 똑똑하니 좋은 처방을 물어보면 되지 않나?" 여기에 함정이 있다.
              거대언어모델은 <b>환각(hallucination)</b> — 존재하지 않는 사실을 자신 있게 지어내는 현상 —
              을 보인다. 일어나지 않는 화학 반응을 매끄럽게 설명하고, 만들 수 없는 처방을 태연히 제시하며,
-             <b>규제 수치까지 지어낸다.</b>`,
+             <b>규제 수치와 물성값까지 지어낸다.</b>`,
       art: `
         <div class="f1-versus f1-seq">
           <div class="f1-quote bad">
             <div class="f1-qhead">✕ LLM에게 통째로 맡기면</div>
-            <div class="f1-said">"SLS는 소아 기준 <b>15mg</b>까지 안전합니다.
-              유당과 함께 배합하셔도 문제없습니다."</div>
+            <div class="f1-said">"이 화합물의 용해도는 약 <b>0.2 mg/mL</b>로 충분합니다.
+              미분화 정제로 가시면 됩니다."</div>
             <span class="f1-badge bad">환각</span>
             <span class="f1-badge soft">근거 없음</span>
-            <div class="f1-cap">문장은 매끄럽지만 수치의 출처가 없다.
-              제약에서 이 오차는 곧 제품 폐기와 허가 반려다.</div>
+            <div class="f1-cap">측정한 적 없는 값을 단정한다.
+              그 값 하나에 전략 선택 전체가 걸려 있다.</div>
           </div>
           <div class="f1-quote good">
-            <div class="f1-qhead">✓ 규칙표에 근거를 물으면</div>
-            <div class="f1-said f1-mono">rule_id: INC002<br>
-              excipient: Lactose<br>
-              risk_group: Secondary Amine<br>
-              mechanism: Maillard 반응 → 갈변<br>
-              verification_status: VERIFIED<br>
-              alternative: Mannitol</div>
+            <div class="f1-qhead">✓ 이 시스템은</div>
+            <div class="f1-said f1-mono">logs_esol: −3.12 (Tm 미반영)<br>
+              logs_gse: −4.25 (Tm 반영)<br>
+              편차: 1.13 log ≥ 1.0<br>
+              → bcs_class: 확정하지 않음<br>
+              → 요청: DRQ_SOL · 평형용해도<br>
+              source: Delaney 2004 · Jain 2001</div>
             <span class="f1-badge good">출처 추적됨</span>
-            <span class="f1-badge good">항상 같은 판정</span>
-            <div class="f1-cap">한 줄마다 어디서 온 수치인지가 붙어 있고,
-              판정은 백 번 돌려도 같다.</div>
+            <span class="f1-badge good">모르면 묻는다</span>
+            <div class="f1-cap">예측끼리 어긋나면 한쪽을 믿지 않고,
+              어떤 실험이 필요한지 말한다.</div>
           </div>
         </div>`,
-      note: `<b>창의적인 아이디어를 내는 능력</b>과 <b>그 아이디어가 안전하고 규정에 맞는지 빈틈없이 검증하는 능력</b>은
-             서로 다른 일이다. 후자를 말 잘하는 AI에게 통째로 맡기는 것은 위험하다.`,
+      note: `<b>창의적인 아이디어를 내는 능력</b>과 <b>그 아이디어가 맞는지 빈틈없이 검증하는 능력</b>,
+             그리고 <b>모르는 것을 모른다고 말하는 정직함</b>은 서로 다른 일이다.
+             뒤의 두 가지를 말 잘하는 AI에게 통째로 맡기는 것은 위험하다.`,
     },
 
     {
       nav: "핵심 아이디어",
       kicker: "설계 원칙",
-      title: "창의는 AI가, 검증은 규칙이",
-      lead: `그래서 역할을 둘로 나눴다. <b>새로운 처방을 상상하고 만드는 일은 AI에게</b>,
-             <b>그것이 맞는지 검사하는 일은 "절대 틀리지 않는 규칙"에게</b> 맡긴다.
-             이 분업이 시스템 전체의 골격이다.`,
+      title: "창의는 AI가, 검증은 규칙이, 모르는 것은 실험이",
+      lead: `역할을 나눴다. <b>새로운 처방을 상상하고 만드는 일은 AI에게</b>,
+             <b>그것이 맞는지 검사하는 일은 "절대 틀리지 않는 규칙"에게</b>,
+             <b>규칙이 판단할 값이 없을 때는 실험에게</b> 맡긴다.`,
       art: `
         <div class="f1-split f1-seq">
           <div class="f1-half ai">
             <h4>AI 에이전트가 하는 일</h4>
             <p>규칙만으로는 결코 할 수 없는 것</p>
             <ul>
-              <li>천문학적인 조합 공간에서 쓸 만한 후보를 상상</li>
-              <li>안정성·복용 편의·단가·규제 사이의 타협점 찾기</li>
-              <li>룰북에 없는 새로운 상황을 판단</li>
+              <li>고른 전략 안에서 쓸 만한 처방을 상상</li>
+              <li>안정성·복용 편의·단가 사이의 타협점 찾기</li>
+              <li>통과한 후보들의 상대적 우수도 평가</li>
             </ul>
           </div>
           <div class="f1-guard">
@@ -102,351 +103,319 @@
             <h4>결정론적 규칙이 하는 일</h4>
             <p>AI의 추측이 끼어들면 위험한 것</p>
             <ul>
-              <li>"SLS가 소아 상한을 넘는가?" 같은 수치 판정</li>
-              <li>같은 입력이면 항상 같은 결과 (오차 0%)</li>
-              <li>근거가 확인된 규칙 행만 반려를 만들 수 있음</li>
+              <li>어떤 전략을 고를지 — 같은 입력이면 같은 계획</li>
+              <li>금기·어린이 상한 같은 수치 판정 (오차 0%)</li>
+              <li>어떤 실험을 요청할지, 후보를 믿어도 되는지</li>
             </ul>
           </div>
         </div>
-        <div class="f1-cap">규칙은 "이건 틀렸어"까지만 말할 수 있고, 새로운 답을 만들어 내지는 못한다.
-          둘은 경쟁 관계가 아니라 서로의 빈틈을 메우는 <b>역할 분담</b>이다.</div>`,
-      note: `판단의 성격에 따라 검사를 두 종류로 나눈다. <b>숫자로 답이 떨어지는 것</b>("SLS가 10mg 이하인가")은
-             계산기가, <b>맥락을 읽어야 하는 것</b>("이 조합이 어린이가 먹기에 자연스러운가")은 심사 에이전트가 맡는다.
-             새 규칙표가 들어오면 시스템이 둘 중 어느 쪽인지 보고 알맞은 검사에 자동으로 연결한다.`,
+        <div class="f1-cols c3 f1-seq" style="margin-top:14px">
+          <div class="f1-box f1-det"><b>반려</b><span>룰북만 할 수 있다</span></div>
+          <div class="f1-box f1-det"><b>신뢰도 태그</b><span>데이터 요청 계층만 정한다</span></div>
+          <div class="f1-box f1-jud"><b>순위</b><span>심사관은 이것만 정한다</span></div>
+        </div>`,
+      note: `규칙은 "이건 틀렸어"까지만 말할 수 있고 새로운 답을 만들지는 못한다. AI는 답을 만들지만
+             그 답이 맞는지는 보증하지 못한다. 그리고 둘 다 <b>측정하지 않은 값을 대신 알아낼 수는 없다</b> —
+             그 빈칸은 실험 요청으로 채운다.`,
     },
 
     {
       nav: "전체 흐름 ★",
       kicker: "시스템 구조",
-      title: "요청 하나가 처방이 되기까지",
-      lead: `에이전트 구성이 <b>고정돼 있지 않다.</b> 미리 정해 둔 AI를 매번 똑같이 돌리는 게 아니라,
-             요청이 들어올 때마다 그 상황에 필요한 전문가를 그때그때 불러 팀을 새로 꾸린다
-             — <b>자기조직형 멀티 에이전트</b>. 아래가 그 전체 흐름이다.`,
+      title: "분자식 하나가 후보 처방 목록이 되기까지",
+      lead: `에이전트 구성이 <b>고정돼 있지 않다.</b> 요청이 들어올 때마다 그 상황에 맞는 전략과
+             전문가를 그때그때 골라 팀을 꾸린다. 그 선택은 AI가 아니라 <b>규칙표가 결정론적으로</b> 한다 —
+             같은 입력이면 같은 계획이 나오고, 계획 자체가 감사 기록이 된다.`,
       art: `
         <div class="f1-arch f1-seq">
-          <div class="f1-io">사용자 요청 · 주성분 · 대상 환자 · 제형 · 자연어 요구</div>
+          <div class="f1-io">입력 · <b>SMILES + 용량</b>(필수) · 대상 환자 · 이미 가진 실측값(선택)</div>
           <div class="f1-flowmark">▼</div>
+
+          <div class="f1-tier t3">
+            <header><span>① 페이즈 게이트 — 어떤 전략이 맞는가</span><span>결정론 · LLM 0회</span></header>
+            <div class="f1-sub">
+              <div class="f1-pill-sm">파생값 (D0 · Tg 여유 · ΔpKa)</div>
+              <div class="f1-pill-sm">BCS/DCS</div>
+              <div class="f1-pill-sm">고체상</div>
+              <div class="f1-pill-sm">가용화 신호</div>
+              <div class="f1-pill-sm">ASD 공정</div>
+              <div class="f1-pill-sm">공정 경로</div>
+            </div>
+          </div>
+          <div class="f1-flowmark">▼ 실험 요청 ① 전략을 좁히는 값 — <b>막지 않고 진행</b></div>
 
           <div class="f1-tier t1">
-            <header><span>① 지휘 계층</span><span>Control Plane</span></header>
-            <div class="f1-cols c2">
-              <div class="f1-box f1-llm"><b>총괄 오케스트레이터</b>
-                <span>요청을 분석해 이번 설계에 필요한 전문가 팀 구성을 스스로 결정</span></div>
-              <div class="f1-box f1-llm"><b>반성 에이전트</b>
-                <span>반려의 근본 원인을 짚고 재설계 방향을 지시 (최대 5회)</span></div>
-            </div>
+            <header><span>② 계획</span><span>전략 가족 8종 · 점수식</span></header>
+            <div class="f1-box f1-det"><b>상위 전략 ≤ 3개 선택 · 계획 서명 기록</b>
+              <span>판정이 안 갈리면 좁히지 않고 양쪽 전략을 모두 연다</span></div>
           </div>
-          <div class="f1-flowmark">▼ 팀 소집</div>
+          <div class="f1-flowmark">▼</div>
 
           <div class="f1-tier t2">
-            <header><span>② 설계 계층 — 병렬 후보 경쟁</span><span>Generators</span></header>
+            <header><span>③ 설계 — 전략별 병렬 후보</span><span>Generators</span></header>
             <div class="f1-cols c3">
-              <div class="f1-box"><b>설계 A</b><span>직접타정 전략</span></div>
-              <div class="f1-box"><b>설계 B</b><span>습식과립 전략</span></div>
-              <div class="f1-box"><b>설계 C</b><span>가용화 전략</span></div>
+              <div class="f1-box f1-llm"><b>후보 A</b><span>미분화 + 즉시방출 정제</span></div>
+              <div class="f1-box f1-llm"><b>후보 B</b><span>분무건조 ASD → 건식과립 → 타정</span></div>
+              <div class="f1-box f1-llm"><b>후보 C</b><span>자가유화 지질제형 캡슐</span></div>
             </div>
-            <div class="f1-cap">초안을 하나만 만들지 않는다. 서로 다른 전략으로 동시에 만들어
-              경쟁시키고, 검증을 가장 잘 통과하는 후보가 살아남는다.</div>
           </div>
           <div class="f1-flowmark">▼</div>
 
           <div class="f1-tier t3">
-            <header><span>③ 규칙 게이트 — 금기가 있는가</span><span>Deterministic + Dynamic Jury</span></header>
-            <div class="f1-cols c2">
-              <div class="f1-box f1-det"><b>규칙 검사 도구벨트 · 오차 0%</b>
-                <div class="f1-sub" style="margin-top:7px">
-                  <div class="f1-pill-sm">배합 금기</div>
-                  <div class="f1-pill-sm">공정 실패</div>
-                  <div class="f1-pill-sm">규제 상한</div>
-                </div>
-                <span style="display:block;margin-top:7px">AI의 추측이 없다. 몇 번을 돌려도 같은 결과.
-                  단, 통과는 “위반을 <b>발견하지 못했다</b>”는 뜻이다</span>
-              </div>
-              <div class="f1-box f1-jud"><b>동적 심사위원단 · 상황따라 N명</b>
-                <div class="f1-sub" style="margin-top:7px">
-                  <div class="f1-pill-sm">👶 소아 안전 심사관</div>
-                  <div class="f1-pill-sm">💧 가용화 전략 심사관</div>
-                  <div class="f1-pill-sm dashed">… 조건 맞으면 추가 소집</div>
-                </div>
-                <span style="display:block;margin-top:7px">통과한 후보만 넘어온다. <b>반려 권한은 없다</b></span>
-              </div>
+            <header><span>④ 규칙 게이트 — 금기가 있는가</span><span>결정론 · 반려 권한</span></header>
+            <div class="f1-sub">
+              <div class="f1-pill-sm">배합 금기</div>
+              <div class="f1-pill-sm">어린이 안전</div>
+              <div class="f1-pill-sm">공정 세부 · 배합비 · 잔류용매</div>
             </div>
           </div>
-          <div class="f1-flowmark">▼ 통과한 후보만</div>
+          <div class="f1-flowmark">▼ 통과한 후보만 · 실험 요청 ② 후보별 신뢰도</div>
 
           <div class="f1-tier t3">
-            <header><span>④ 근거 게이트 — 실행할 만큼 아는가</span><span>Evidence Readiness</span></header>
-            <div class="f1-cols c3">
-              <div class="f1-box f1-det"><b>프로토콜 전 필수</b>
-                <span>없으면 전략이 바뀐다 → 실행 보류</span></div>
-              <div class="f1-box f1-det"><b>병행 수행</b>
-                <span>전략은 그대로 · 중단/변경 기준과 함께</span></div>
-              <div class="f1-box f1-det"><b>배치 후 조건부</b>
-                <span>첫 배치 결과를 보고 필요하면</span></div>
+            <header><span>⑤ 동적 심사위원단</span><span>상황따라 N명 · 반려 권한 없음</span></header>
+            <div class="f1-sub">
+              <div class="f1-pill-sm">💧 가용화 전략</div>
+              <div class="f1-pill-sm">🏭 공정 실현성 · 항상</div>
+              <div class="f1-pill-sm">🧊 고체상 안정성</div>
+              <div class="f1-pill-sm dashed">… 조건 맞으면 추가 소집</div>
             </div>
-            <div class="f1-cap">반려 권한이 아니라 <b>보류 권한</b>을 가진 게이트다.
-              선행 근거가 비면 실행 가능한 프로토콜 대신 <b>확인시험 프로토콜</b>이 나간다.</div>
           </div>
-          <div class="f1-flowmark">▼</div>
+          <div class="f1-flowmark">▼ 합의 · 가중평균</div>
 
-          <div class="f1-io">합의 도출 — 결정론 하드페일 + 심사 가중점수 → <b>권고 후보 처방</b></div>
+          <div class="f1-io win">★ 후보 처방 목록 — 성분 · 공정 단계 · 근거 · <b>grounded / provisional</b> · 남은 실험 요청</div>
           <div class="f1-cols c3" style="margin-top:2px">
-            <div class="f1-loop">⟲ 규칙 반려 → 반성 에이전트 → ① 로</div>
-            <div class="f1-loop">⟲ 확인시험 결과 → 입력·근거 계층으로</div>
-            <div class="f1-io win">✓ 연구자 승인 → 실행 가능 프로토콜</div>
+            <div class="f1-loop">⟲ 규칙 반려 → 되돌림 규칙 → 반성 → ① 로</div>
+            <div class="f1-loop">⟲ 측정값 제출 → 계획 같으면 재계산만</div>
+            <div class="f1-loop">⟲ 계획이 바뀌면 → ③ 설계부터</div>
           </div>
         </div>`,
-      note: `구조의 뼈대는 <b>게이트가 둘</b>이라는 점이다. 규칙 게이트는 “금기가 있는가”를 묻고 반려하며,
-             근거 게이트는 “알고 있는가”를 묻고 보류한다. 자료가 없어서 규칙이 아무것도 못 잡은 경우를
-             통과로 읽지 않기 위해서다. 여기에 <b>심사위원단에 고정 명단이 없다</b>는 점이 더해진다 —
-             대상이 소아라면 소아 안전 심사관이, 난용성 약(BCS II·IV)이면 가용화 심사관이 그 자리에서
-             만들어지고 나머지는 아예 생성되지 않는다.`,
+      note: `시스템은 <b>후보 처방 목록에서 끝난다.</b> 실행 프로토콜·포장 사양·승인 절차·배치 제조 이후는
+             다루지 않는다 — 처방이 실행되지 않으면 그 단계들은 입력 자체가 없기 때문이다.
+             대신 모든 후보에 <b>얼마나 믿어도 되는지</b>와 <b>무엇을 측정하면 확정되는지</b>가 붙는다.
+             심사위원단에는 고정 명단이 없어서, 조건이 맞지 않는 심사관은 <b>아예 생성되지 않는다.</b>`,
+    },
+
+    {
+      nav: "값의 세 계층 ★",
+      kicker: "v3의 중심",
+      title: "이 값은 계산한 것인가, 추정한 것인가, 잰 것인가",
+      lead: `제형 판단에 쓰는 모든 값을 <b>어떻게 얻었는가</b>로 나눈다.
+             이 구분이 곧 시스템의 작동 원리다 — <b>계산할 수 있는 것은 묻지 않고,
+             잴 수밖에 없는 것만 묻는다.</b>`,
+      art: `
+        <div class="f1-cols c3 f1-seq">
+          <div class="f1-box f1-det"><b>A · 계산값</b>
+            <span>분자식에서 결정론적으로 나온다.<br>
+              분자량 · cLogP · 극성표면적 · 회전가능결합 · 구조 패턴 82종</span>
+            <span class="f1-badge good">확정 · 자동</span></div>
+          <div class="f1-box"><b>B · 예측값</b>
+            <span>A에 공개된 경험식을 적용한다.<br>
+              ESOL · GSE 용해도 · ⅔ 경험칙 Tg</span>
+            <span class="f1-badge soft">잠정 · *_est 변수에만</span></div>
+          <div class="f1-box f1-det"><b>C · 실측값</b>
+            <span>실험을 해야만 나온다.<br>
+              XRPD · DSC · TGA · pKa · 평형용해도 · 투과도 · 강제분해</span>
+            <span class="f1-badge good">확정 · 측정 후</span></div>
+        </div>
+        <div class="f1-policy f1-seq" style="margin-top:14px">
+          <div class="f1-prow use"><span class="st">BCS 등급</span>
+            <span class="to">→</span><span class="act"><b>실측으로만 확정</b> — 예측으로는 "잠정 저용해도"까지만 말한다</span></div>
+          <div class="f1-prow prov"><span class="st">예측 vs 실측</span>
+            <span class="to">→</span><span class="act">서로 다른 변수라 <b>공존한다</b> — 실측이 와도 예측은 보정 정보로 남는다</span></div>
+          <div class="f1-prow down"><span class="st">무거운 예측 모델</span>
+            <span class="to">→</span><span class="act">기본 구성에서 뺐다 — 경험식이 안 되면 <b>모델을 늘리지 않고 실측을 요청</b></span></div>
+          <div class="f1-prow drop"><span class="st">모르는 값</span>
+            <span class="to">→</span><span class="act"><b>기본값으로 채우지 않는다</b> — 투과도 인자를 1로 채우면 IIa가 수학적으로 불가능해진다</span></div>
+        </div>`,
+      note: `파생값도 코드가 아니라 <b>표의 식</b>이다(<code class="f1-mono">derived_quantities.csv</code> 23행).
+             보수적 logS를 파이썬에서 미리 계산하게 짰더니 재료(ESOL·GSE)가 아직 없어서 값이 늘 비었고,
+             아무 실측도 없는 상태에서 <b>전략이 하나도 생성되지 않았다.</b> 그 식을 표의 한 행으로 옮기자
+             순서 문제가 사라졌다.`,
     },
 
     {
       nav: "입구: 분자 계산",
       kicker: "입력 계층",
-      title: "검사를 시작하려면, 이 약의 작용기부터 알아야 한다",
-      lead: `유당이 위험한지 아닌지는 <b>약에 아민기가 있느냐</b>에 달려 있다.
-             이걸 사람이 손으로 적어 넣으면 틀린다 — 실제로 이 프로젝트의 초기 데모가 그렇게 틀렸다.
-             그래서 지금은 <b>분자식(SMILES)에서 시작한다.</b>`,
+      title: "필요한 건 분자식과 용량, 나머지는 계산한다",
+      lead: `유당이 위험한지 아닌지는 <b>약에 아민기가 있느냐</b>에 달려 있고,
+             어떤 가용화 전략이 맞는지는 <b>얼마나 녹느냐</b>에 달려 있다.
+             사람이 손으로 적으면 틀린다. 그래서 <b>분자식(SMILES)에서 시작한다.</b>`,
       art: `
         <div class="f1-pipe f1-seq">
           <div>
-            <div class="f1-smiles">SMILES<br>CC(=O)Nc1ccc(O)cc1</div>
-            <div class="f1-cap" style="margin-top:7px">RDKit이 받는 유일한 입력</div>
+            <div class="f1-smiles">SMILES<br>+ dose_mg</div>
+            <div class="f1-cap" style="margin-top:7px">필수 입력은 이 둘뿐</div>
           </div>
           <div class="f1-branches">
             <div class="f1-branch"><span class="tick">├─</span>
-              <div><b>descriptor 9종 계산</b>
-                <span>분자량 151.2 · logP 1.35 · TPSA 49.3 …</span></div></div>
+              <div><b>구조 품질 검사</b>
+                <span>파싱 · 염 제거(parent 추출) · 전하 · 입체중심</span></div></div>
             <div class="f1-branch"><span class="tick">├─</span>
-              <div><b>염 제거 → parent 추출</b>
-                <span>besylate·HCl 같은 염은 벗겨낸 뒤 매칭</span></div></div>
+              <div><b>분자 특성값 35종</b>
+                <span>분자량 · cLogP · 극성표면적 · 방향족 비율 …</span></div></div>
             <div class="f1-branch"><span class="tick">├─</span>
-              <div><b>SMARTS 구조 플래그</b>
-                <span>fr_* fragment 카운트와 교차검증 — 불일치하면 경고</span></div></div>
+              <div><b>구조 패턴 82종</b>
+                <span>구조 사실 18 · 조건부 경고 52 · 높은 경고 12</span></div></div>
             <div class="f1-branch low"><span class="tick">└─</span>
-              <div><b>물성 추정 (저신뢰)</b>
-                <span>용해도·투과도 → <b>BCS 분류 확정에는 쓰지 않음</b></span></div></div>
+              <div><b>폐쇄형 예측 (잠정)</b>
+                <span>ESOL · GSE 용해도 → <b>BCS 등급 확정에는 쓰지 않음</b></span></div></div>
           </div>
         </div>
         <div class="f1-flagcmp f1-seq">
           <div class="f1-box">
-            <b>Acetaminophen</b>
+            <b>가상 화합물 — 아미드</b>
             <div class="f1-flagline on"><i class="dot"></i>is_amide_not_amine</div>
             <div class="f1-flagline off"><i class="dot"></i>has_primary_amine</div>
             <div class="f1-flagline off"><i class="dot"></i>has_secondary_amine</div>
-            <span>이름은 "아미노"페놀 유도체지만 실제로는 <b>아미드</b> — 반응할 유리 아민이 없다</span>
+            <span>이름에 "아미노"가 들어가도 실제로는 <b>아미드</b>일 수 있다 — 반응할 유리 아민이 없다</span>
           </div>
           <div class="f1-box">
-            <b>Fluoxetine HCl</b>
+            <b>X3 — 2차 지방족 아민</b>
             <div class="f1-flagline off"><i class="dot"></i>is_amide_not_amine</div>
             <div class="f1-flagline off"><i class="dot"></i>has_primary_amine</div>
             <div class="f1-flagline on"><i class="dot"></i>has_secondary_amine</div>
-            <span>2차 아민 — 유당과 Maillard 반응을 일으킨다</span>
+            <span>배합 금기 규칙과 <b>강제분해 요청</b>이 함께 붙는다</span>
           </div>
-        </div>
-        <div class="f1-cap">같은 유당 처방인데 <b>주성분에 따라 판정이 갈린다.</b>
-          아세트아미노펜은 반려 없음, 플루옥세틴은 INC002 반려.</div>`,
-      note: `마지막 갈래가 중요하다. logP로 용해도를 <b>추정할 수는</b> 있지만 그건 경향일 뿐이고,
-             규칙표에도 <code class="f1-mono">confidence=low · 실측 우선</code>이라고 못 박혀 있다.
-             그래서 이 시스템은 <b>추정값으로 BCS 등급을 확정하지 않는다.</b> 실측이 들어왔을 때만 분류하고,
-             없으면 "사람 판단 필요"로 넘긴다. 계산할 수 있다고 해서 판정해도 되는 것은 아니다.`,
+        </div>`,
+      note: `분자식을 읽지 못하면 <b>실행 전에 사유와 함께 되돌려 준다.</b> 구조를 못 얻은 채 실행되면
+             규칙 게이트는 통과가 아니라 <b>사람 이관</b>을 낸다 — 작용기가 0개면 구조 기반 금기가
+             하나도 발동하지 않고, 그 침묵을 합격으로 세면 게이트가 있으나 마나가 된다.`,
     },
 
     {
       nav: "검사 순서",
       kicker: "실행 순서",
-      title: "규칙표를 아무 순서로나 돌릴 수는 없다",
-      lead: `"직접타정 규칙"은 <b>직접타정이 선택된 뒤에야</b> 의미가 있고, 그 선택은 유동성 등급이 나온 뒤에야
-             가능하다. 그래서 규칙표마다 실행 우선순위가 붙어 있고, <b>앞 단계가 만든 값이 뒷 단계의
-             발동 조건으로 흘러 들어간다.</b>`,
+      title: "앞 단계가 만든 값이 뒷 단계의 조건이 된다",
+      lead: `가용화 전략은 <b>약이 얼마나 녹는지 판정된 뒤에야</b> 고를 수 있고, "직접타정 규칙"은
+             <b>직접타정이 선택된 뒤에야</b> 의미가 있다. 그래서 단계마다 순서가 붙어 있고,
+             <b>앞 단계가 만든 값이 뒷 단계의 발동 조건으로 흘러 들어간다.</b>`,
       art: `
         <div class="f1-stack f1-seq">
-          <div class="f1-lvl"><span class="n">0</span><span>참조 마스터 — 부형제 마스터 · descriptor 정의 · SMARTS 정의</span><span></span></div>
-          <div class="f1-lvl"><span class="n">5</span><span>API 물성 임계값 — Ro5 / Veber 경고 밴드</span><span></span></div>
-          <div class="f1-lvl flow"><span class="n">10</span><span>유동성 등급 — 안식각 48°</span><em>→ flow_character = "Poor"</em></div>
-          <div class="f1-lvl flow"><span class="n">11</span><span>공정 경로 분기 — 직접타정 배제</span><em>→ selected_route = "DG"</em></div>
-          <div class="f1-lvl key"><span class="n">20</span><span>배합 금기 (1:1)</span><em>성분을 바꿔야 하는 반려</em></div>
-          <div class="f1-lvl key"><span class="n">21</span><span>소아 안전 상한</span><em>먼저 걸러낸다</em></div>
-          <div class="f1-lvl"><span class="n">22</span><span>색소 · 향료</span><span></span></div>
-          <div class="f1-lvl"><span class="n">30</span><span>다성분 상호작용</span><span></span></div>
-          <div class="f1-lvl flow"><span class="n">40</span><span>선택된 공정의 세부 규칙</span><em>← selected_route 참조</em></div>
-          <div class="f1-lvl"><span class="n">45</span><span>부형제 배합비</span><span></span></div>
-          <div class="f1-lvl"><span class="n">50</span><span>코팅 · 잔류용매</span><span></span></div>
-          <div class="f1-lvl"><span class="n">60</span><span>BCS 분류 → 전략</span><span></span></div>
-          <div class="f1-lvl"><span class="n">70</span><span>포장 · 안정성 · 분석법</span><span></span></div>
+          <div class="f1-lvl"><span class="n">10</span><span>목표 고정 — 용량 · 대상 환자 · 보관 온도</span><span></span></div>
+          <div class="f1-lvl"><span class="n">20</span><span>분자 프로파일 — 계산값 + ESOL/GSE</span><em>→ logs_pred_min</em></div>
+          <div class="f1-lvl"><span class="n">25</span><span>실험 요청 ① — 전략을 좁히는 값</span><em>막지 않음</em></div>
+          <div class="f1-lvl flow"><span class="n">30</span><span>BCS/DCS 판정</span><em>→ dcs_subclass</em></div>
+          <div class="f1-lvl flow"><span class="n">35</span><span>고체상 판단 (권고만)</span><em>→ solid_form_zone</em></div>
+          <div class="f1-lvl flow"><span class="n">40</span><span>가용화 신호</span><em>→ sig_enabling_required</em></div>
+          <div class="f1-lvl flow"><span class="n">45</span><span>ASD 공정 — 녹는점 · 열안정성</span><em>→ HME / SDD</em></div>
+          <div class="f1-lvl flow"><span class="n">48</span><span>공정 경로 — 안식각 48°</span><em>→ 직접타정 배제</em></div>
+          <div class="f1-lvl"><span class="n">50</span><span>계획 — 전략 점수 → 상위 3개</span><span></span></div>
+          <div class="f1-lvl"><span class="n">55</span><span>설계 (AI)</span><span></span></div>
+          <div class="f1-lvl key"><span class="n">60</span><span>규칙 게이트 — 배합 금기 → 어린이 안전 → 공정 세부</span><em>반려는 여기서만</em></div>
+          <div class="f1-lvl"><span class="n">65</span><span>실험 요청 ② — 후보별 신뢰도</span><span></span></div>
+          <div class="f1-lvl"><span class="n">70</span><span>심사관 소집 → 심사(75) → 합의(80)</span><span></span></div>
+          <div class="f1-lvl"><span class="n">90</span><span>후보 처방 목록</span><em>여기서 끝</em></div>
         </div>`,
-      note: `폴더 번호만 보면 규제(<code class="f1-mono">05_regulatory</code>)가 마지막 같지만,
-             실제로는 <b>소아 안전이 21번으로 가장 먼저 도는 축에 속한다.</b>
-             값 몇 개를 조정해서 해결되는 문제가 아니라 성분 자체를 바꿔야 하는 반려라,
-             무거운 공정 계산을 하기 전에 먼저 걸러내는 편이 낫기 때문이다.`,
+      note: `투과도를 모르면 "녹는 속도가 문제(IIa)"인지 "녹는 양이 문제(IIb)"인지 가를 수 없고,
+             두 경우의 해법은 정반대다. 이때 시스템은 한쪽으로 단정하지 않고
+             <b>미분화와 가용화를 모두 후보로 열어 둔다.</b> 규칙 게이트 안에서는
+             <b>어린이 안전이 배합 금기 바로 뒤</b>에서 돈다 — 성분 자체를 바꿔야 하는 반려라
+             무거운 공정 계산 전에 먼저 걸러낸다.`,
+    },
+
+    {
+      nav: "실험 요청 ★",
+      kicker: "Lab-in-the-loop",
+      title: "판정이 갈리는 곳에서만, 구체적인 시험을 묻는다",
+      lead: `계산으로 알 수 없는 값이 판정을 가르는 지점에 오면, 시스템이
+             <b>XRPD·DSC·평형용해도 같은 구체적인 시험</b>을 요청한다.
+             요청할 수 있는 시험은 <b>측정 카탈로그 20종</b>뿐이고, 요청은 <b>실행을 막지 않는다.</b>`,
+      art: `
+        <div class="f1-arch f1-seq">
+          <div class="f1-tier">
+            <header><span>시료가 적게 드는 것부터</span><span>measurement_catalog.csv · 20종</span></header>
+            <div class="f1-sub">
+              <div class="f1-pill-sm"><b>Tier 1</b> ~10 mg · XRPD · DSC · TGA · 수분</div>
+              <div class="f1-pill-sm"><b>Tier 2</b> ~30 mg · pKa · 평형용해도 · 투과도 · DVS</div>
+              <div class="f1-pill-sm"><b>Tier 3</b> 20–300 mg · 강제분해 · 다형 · 유리형성능 · 유동성</div>
+              <div class="f1-pill-sm dashed"><b>전략별</b> ASD · SEDDS · CD 실현성 · 염 스크리닝</div>
+            </div>
+          </div>
+          <div class="f1-flowmark">▼ 언제 묻는가 — data_request_triggers.csv · 16행</div>
+          <div class="f1-cols c2">
+            <div class="f1-box f1-det"><b>① 전략을 좁히는 요청 · 계획 전</b>
+              <span>결과에 따라 어느 전략을 고를지가 바뀐다.
+                예: 녹는점 없이는 용융압출과 분무건조를 못 가른다</span></div>
+            <div class="f1-box f1-det"><b>② 신뢰도를 높이는 요청 · 후보별</b>
+              <span>이미 고른 전략의 신뢰도만 바뀐다.
+                예: ASD 후보가 생긴 뒤의 고분자 혼화성</span></div>
+          </div>
+          <div class="f1-flowmark">▼</div>
+          <div class="f1-cols c2">
+            <div class="f1-box"><b>남은 요청 없음 ⟺ grounded</b>
+              <span>계산값이지 판단이 아니다. AI가 신뢰도를 매길 여지가 없다</span></div>
+            <div class="f1-box"><b>남은 요청 있음 ⟺ provisional</b>
+              <span>"틀렸다"가 아니라 "이 실험을 하면 확정된다"</span></div>
+          </div>
+          <div class="f1-flowmark">▼ 측정값을 넣으면 — 계획 서명을 비교한다</div>
+          <div class="f1-cols c2">
+            <div class="f1-io">서명 같음 → 신뢰도·요청만 갱신 (LLM 0회)</div>
+            <div class="f1-io">서명 다름 → 설계부터 다시</div>
+          </div>
+        </div>`,
+      note: `건너뛰어도 멈추지 않는다 — 예측값으로 계속하고 <code class="f1-mono">provisional</code>을 남긴다.
+             같은 시험을 가리키는 요청은 <b>하나로 합치고</b>, 이미 준 값은 <b>다시 묻지 않는다.</b>
+             그리고 같은 용해도 요청이라도 <b>"예측이 낮아서"</b>와 <b>"두 예측이 1 log 이상 어긋나서"</b>는
+             다른 확신 수준이라 화면에 다른 사유로 뜬다.`,
     },
 
     {
       nav: "실제로 이렇게 돌았다",
       kicker: "동작 예시",
-      title: "설계 → 반려 → 재설계 → 통과",
-      lead: `요청: <b>"소아용 플루옥세틴 정제를 설계하라."</b>
-             아래는 실제 실행 트레이스를 따라간 것이다. 이 화면 오른쪽에서 직접 돌려 볼 수 있다.`,
+      title: "아무 실측 없이 시작해서, 두 번의 요청으로 좁힌다",
+      lead: `가상 화합물 <b>X1</b> — 용량 150 mg, cLogP 3.6, 분자량 412, 에스터 경고.
+             그 외 실측값은 전혀 없다. 수치는 시드 규칙표로 프로토타입을 실제로 돌려 얻었다.`,
       art: `
         <div class="f1-story f1-seq">
-          <div class="f1-beat"><div class="who">RDKit</div><div class="what"><div class="card">
-            구조 플래그 검출 <span class="f1-mono">Fluoxetine → ['has_secondary_amine']</span></div></div></div>
+          <div class="f1-beat"><div class="who">예측</div><div class="what"><div class="card">
+            ESOL logS −4.59 (녹는점이 없어 GSE 불가)
+            <span class="f1-mono">추정 용해도 0.0106 mg/mL → 용량을 녹이는 데 ≈ 14,150 mL (기준 250 mL)</span></div></div></div>
 
-          <div class="f1-beat"><div class="who">route</div><div class="what"><div class="card">
-            유동성 등급으로 공정 후보를 좁힌다 <span class="f1-mono">경쟁 전략: DC, WG</span></div></div></div>
+          <div class="f1-beat"><div class="who">판정</div><div class="what"><div class="card">
+            잠정 저용해도 · 이온화기 없음 → 염 경로 닫힘
+            <span class="f1-mono">IIa/IIb 미정 → 미분화와 가용화를 모두 연다</span></div></div></div>
 
-          <div class="f1-beat"><div class="who">설계</div><div class="what"><div class="card">
-            가장 흔한 희석제로 초안을 만든다
-            <span class="f1-mono">cand-0-DC · cand-0-WG — 희석제 Lactose monohydrate</span></div></div></div>
+          <div class="f1-beat fix"><div class="who">요청 ①</div><div class="what"><div class="card">
+            <b>3건</b> — 녹는점(DSC) · 평형용해도 · 분체 유동성
+            <span class="f1-mono">그래도 멈추지 않는다</span></div></div></div>
 
-          <div class="f1-beat reject"><div class="who">게이트</div><div class="what"><div class="card">
-            <b>⛔ INC002 반려</b> — 2차 아민 + 유당 → Maillard 반응
-            <span class="f1-mono">cand-0-DC 반려 (판정 11 · 위반 2)</span></div></div></div>
+          <div class="f1-beat"><div class="who">계획·설계</div><div class="what"><div class="card">
+            미분화(3.0) · 분무건조 ASD(2.0)
+            <span class="f1-mono">두 후보 모두 provisional · 남은 확인: 강제분해 · 입도-용출 · 유리형성능 · ASD 실현성</span></div></div></div>
 
-          <div class="f1-beat fix"><div class="who">반성</div><div class="what"><div class="card">
-            <b>chemical 계층에서 2건 반려 — 성분 선택 재검토 필요</b>
-            <span class="f1-mono">지시 → Mannitol</span>
-            <span class="f1-mono">(반려 사유에 담긴 alternative_excipient_name 이 그대로 재설계 지시가 된다)</span></div></div></div>
+          <div class="f1-beat jud"><div class="who">사용자</div><div class="what"><div class="card">
+            <b>Tier 1 세트 + 용해도 제출, 투과도는 건너뜀</b>
+            <span class="f1-mono">Tm 234 °C · 무수물 · 열불안정 · 실측 용해도 0.021 mg/mL (FaSSIF 0.045)</span></div></div></div>
 
-          <div class="f1-beat win"><div class="who">설계·게이트</div><div class="what"><div class="card">
-            <b>✓ 통과</b> <span class="f1-mono">cand-1-DC — 희석제 Mannitol · 통과 (판정 10 · 위반 1)</span></div></div></div>
+          <div class="f1-beat"><div class="who">재계산</div><div class="what"><div class="card">
+            GSE logS −5.19 → 예측 0.0027 mg/mL — <b>실측보다 8배 낮게 예측했다</b>
+            <span class="f1-mono">고융점·열불안정 확정 → 분무건조가 근거 있는 선택으로 격상</span>
+            <span class="f1-mono">Tg 여유 40 K (기준 50 K 미달 → 배제 아님, 감점)</span></div></div></div>
 
-          <div class="f1-beat jud"><div class="who">소집</div><div class="what"><div class="card">
-            <b>심사관 2명만 소집됐다</b>
-            <span class="f1-mono">REV001 소아 안전 — 조건 target_population=='pediatric'</span>
-            <span class="f1-mono">REV003 공정 실현성 — 조건 always</span>
-            <span class="f1-mono">REV002 가용화 심사관은 조건 불일치 → 아예 생성되지 않음</span></div></div></div>
-
-          <div class="f1-beat win"><div class="who">합의</div><div class="what"><div class="card">
-            <b>선정 cand-1-DC</b> <span class="f1-mono">가중치 {REV001: 0.545, REV003: 0.455}</span></div></div></div>
+          <div class="f1-beat win"><div class="who">결과</div><div class="what"><div class="card">
+            <b>요청 3건 → 2건</b> (투과도 · 유동성)
+            <span class="f1-mono">미분화(3.0) · 분무건조 ASD(2.0 → 3.0)</span></div></div></div>
+        </div>
+        <div class="f1-cols c2 f1-seq" style="margin-top:14px">
+          <div class="f1-box"><b>X2 — 예측끼리 싸울 때</b>
+            <span>ESOL만 보면 용해도 <b>충분</b>(211 mL), 녹는점 290 °C를 반영한 GSE로는 <b>낮음</b>(2,868 mL).
+              녹는점 하나가 결론을 뒤집는다 → 보수적 값을 쓰고 용해도 측정을 요청</span></div>
+          <div class="f1-box f1-fail"><b>X3 — 구조만으로 끝날 때</b>
+            <span>2차 아민 + 아질산염 함유 가능 부형제 → 니트로사민 위험으로 반려.
+              <b>요청 0건</b> — 더 재도 결론이 안 바뀐다</span></div>
         </div>`,
-      note: `주목할 점 — <b>설계 에이전트는 금기를 미리 피하지 않는다.</b> 가장 흔한 희석제인 유당으로 초안을
-             만들고, 검증이 그걸 잡아낸다. 설계자가 검증의 일을 대신하면 시스템이 무엇을 잡아내는지 보이지 않기
-             때문이다. 실험실에서라면 "만들어 보고 갈변을 확인한 뒤 다시 설계하는" 데 며칠이 걸렸을 과정이고,
-             <b>이 판정은 몇 번을 다시 돌려도 똑같이 나온다.</b><br><br>
-             다만 걸리려면 <b>두 쪽이 실제로 만나야 한다.</b> 룰북은 <span class="f1-mono">Lactose monohydrate</span>라
-             적고 처방은 "유당"이라 적는데, 글자가 같은지만 보던 동안 이 규칙은 조용히 통과했다(2026-08 수정).
-             지금은 부형제 마스터를 사전 삼아 표기·국문명·계열명을 맞춘다. 같은 이유로,
-             <b>구조를 못 읽었으면 통과가 아니라 판정 불가</b>다 — SMILES 오타 하나로 작용기가 0개가 되면
-             구조 기반 금기는 발동할 수 없고, 그 침묵을 합격으로 세면 게이트가 있으나 마나가 된다.`,
-    },
-
-    {
-      nav: "실행 전: 알아야 실행한다 ★",
-      kicker: "근거 충족 게이트",
-      title: "금기가 없다는 것과, 실행해도 된다는 것은 다르다",
-      lead: `규칙표는 <b>알고 있는 값</b>에 대해서만 위반을 판정한다. 값 자체가 없으면 규칙은 아무것도
-             잡지 못하고, 그 침묵이 “안전하다”로 읽힌다. 신약 주성분에서는 이게 일상이다 —
-             수분 안정성도, 배합적합성도, 실험 용해도도 없는 상태로 개발이 시작되기 때문이다.
-             그래서 규칙 게이트 뒤에 <b>질문을 하나 더</b> 둔다.`,
-      art: `
-        <div class="f1-arch f1-seq">
-          <div class="f1-cols c2">
-            <div class="f1-box f1-det"><b>규칙 게이트</b>
-              <span>금기·규제 위반이 있는가 → 있으면 <b>반려</b> (재설계로)</span></div>
-            <div class="f1-box f1-det"><b>근거 게이트</b>
-              <span>실행할 만큼 아는가 → 모르면 <b>보류</b> (확인시험 먼저)</span></div>
-          </div>
-          <div class="f1-flowmark">▼ 후보마다 근거 결손을 계산한다 (LLM 호출 0회)</div>
-
-          <div class="f1-tier">
-            <header><span>요구는 시점으로 나뉜다</span><span>16종 · 데이터로 관리</span></header>
-            <div class="f1-cols c3">
-              <div class="f1-box f1-det"><b>프로토콜 전 필수</b>
-                <span>수계 공정인데 수분 안정성 없음 · 난용성 전략인데 실험 용해도 없음 ·
-                  BCS가 예측 기반 · 아민 + 환원당인데 배합적합성 없음</span></div>
-              <div class="f1-box"><b>병행 수행</b>
-                <span>판별력 있는 용출법 확립 · 시료 용액 안정성.
-                  <b>중단/변경 기준</b>을 함께 낸다</span></div>
-              <div class="f1-box"><b>배치 후 조건부</b>
-                <span>입도–용출 상관 · 잔사 고체상 · 불순물 응답계수 —
-                  첫 배치 결과를 본 뒤에</span></div>
-            </div>
-            <div class="f1-cap">요구는 <b>실제 확인시험 66종 안의 시험만</b> 가리킬 수 있다.
-              없는 시험을 가리키는 행은 읽는 단계에서 버려지므로,
-              모든 요청에 방법·판정 기준·ICH/USP 출처가 붙는다.</div>
-          </div>
-          <div class="f1-flowmark">▼</div>
-
-          <div class="f1-cols c3">
-            <div class="f1-box"><b>실행 불가 초안</b><span>선행 근거 비어 있음.
-              처방과 근거는 보이지만 실행하면 안 된다</span></div>
-            <div class="f1-box"><b>검토용 프로토콜</b><span>선행 근거 충족.
-              연구자 검토 대기</span></div>
-            <div class="f1-box f1-det"><b>실행 가능 프로토콜</b><span>연구자가 승인함.
-              누가 언제 승인했는지 함께 기록</span></div>
-          </div>
-          <div class="f1-flowmark">▼ 확인시험 결과를 넣으면 그 자리에서 다시 계산</div>
-          <div class="f1-io">적합 → 근거 충족 · <b>부적합 → 근거가 채워진 게 아니라 전제가 부정된 것</b>
-            (그 전략은 배제)</div>
-        </div>`,
-      note: `<b>시스템은 스스로 마지막 칸으로 넘어가지 않는다.</b> 근거가 다 채워져도 승인은 사람이 하고,
-             근거가 빈 상태에서 승인을 요청하면 서버가 거부한다. 이 되먹임은 다음 장의 배치 결과 되먹임과
-             <b>돌아가는 곳이 다르다</b> — 확인시험 결과는 “무엇을 아는가”를 바꾸므로 입력·근거 계층으로,
-             배치 결과는 “무엇이 잘못됐는가”를 알려 주므로 설계·프로토콜 개정으로 간다.`,
-    },
-
-    {
-      nav: "만든 뒤: 다음 실험 지시",
-      kicker: "Lab-in-the-loop",
-      title: "AI가 결과를 읽고, 다음 실험을 지시한다",
-      lead: `근거가 채워지고 연구자가 승인해 프로토콜이 실행 가능해지면, 연구원이 배치를 제조한다.
-             나머지 절반은 그 뒤에 온다.
-             연구원이 실험 결과를 자연어로 적어 넣으면, AI가 수치를 판독하고 규칙이 규격 이탈을
-             판정한 뒤, <b>다음에 무슨 실험을 해야 하는지 AI가 지시한다.</b> 사람은 판단의 병목이
-             아니라 벤치에서 그 실험을 수행하는 쪽으로 들어온다 —
-             <b>lab-in-the-loop</b> 구조다.`,
-      art: `
-        <div class="f1-arch f1-seq">
-          <div class="f1-io">연구원이 쓴 실험 노트 (자연어)</div>
-          <div class="f1-flowmark">▼</div>
-          <div class="f1-tier">
-            <header><span>① 판독</span><span>LLM</span></header>
-            <div class="f1-box f1-llm"><b>문장에서 측정값만 옮긴다</b>
-              <span>"30분 용출 62%, 경도 38N, 불순물 0.9%, 표면 갈변"
-                → dissolution=62 · hardness=38 · impurity=0.9 + 관찰 1건.
-                <b>없는 값은 지어내지 않는다</b> — 못 읽은 표현은 못 읽었다고 표시한다.</span></div>
-          </div>
-          <div class="f1-flowmark">▼</div>
-          <div class="f1-tier">
-            <header><span>② 판정</span><span>결정론 규칙</span></header>
-            <div class="f1-box f1-det"><b>규격 이탈 계산 — 같은 데이터면 같은 결과</b>
-              <span>용출 62% &lt; 80% 이탈 · 경도 38N &lt; 40N 이탈 …
-                규칙표가 이탈마다 원인 해석과 재설계 방향을 함께 갖고 있다.</span></div>
-          </div>
-          <div class="f1-flowmark">▼</div>
-          <div class="f1-tier">
-            <header><span>③ 지시</span><span>LLM + 확인시험 마스터 66종</span></header>
-            <div class="f1-cols c2">
-              <div class="f1-box f1-llm"><b>가설</b>
-                <span>이번 결과를 설명하는 인과를 세운다</span></div>
-              <div class="f1-box f1-det"><b>후보는 실제 66종뿐</b>
-                <span>AI는 그 안에서 고를 뿐 시험을 발명하지 못한다.
-                  목록 밖 test_id는 화면에 나가기 전에 버려진다.</span></div>
-            </div>
-            <div class="f1-sub">
-              <div class="f1-pill-sm">1 · T_DISS_PROFILE — 용출 프로파일 <b>근거 FDA</b></div>
-              <div class="f1-pill-sm">2 · T_M9_DISS — 비교용출 <b>근거 ICH M9 3.2</b></div>
-              <div class="f1-pill-sm">3 · T_FORCED — 강제분해 <b>근거 ICH Q14/Q2</b></div>
-            </div>
-          </div>
-          <div class="f1-flowmark">▼</div>
-          <div class="f1-io win">사람이 벤치에서 수행 → 결과를 다시 넣는다 (루프)</div>
-        </div>`,
-      note: `설계 루프와 <b>역할 분담이 똑같다.</b> 창의(판독·가설·시험 선정)는 AI가, 판정(규격 이탈)은
-             규칙이 맡는다. 그리고 지시의 후보를 실제 확인시험 마스터로 묶어 두었기 때문에,
-             모든 "다음 실험"에는 ICH·USP·FDA 출처가 붙는다 — 지어낸 실험을 지시할 수 없다.`,
+      note: `두 가지를 눈여겨볼 만하다. <b>예측과 실측이 공존한다</b> — 예측이 8배 낮았다는 사실 자체가
+             이 계열 화합물의 보정 정보로 남는다. 그리고 <b>투과도를 건너뛰어도 멈추지 않는다</b> —
+             미정인 채로 두 방향을 모두 살려 둔다. 반대로 X3처럼 구조가 이미 결정적이면
+             규칙표가 그 자리에서 끝낸다. lab-in-the-loop은 "항상 많이 묻는 시스템"이 아니다.`,
     },
 
     {
       nav: "근거 없는 규칙은 안 돈다",
       kicker: "차별점",
       title: "출처를 못 찾은 규칙은, 실행되지 않는다",
-      lead: `규칙표의 각 줄에는 그 수치를 <b>어디서 가져왔는지</b>가 함께 적혀 있다.
-             약대생 팀이 규칙 하나하나에 출처를 추적해 붙였고, 추적에 실패한 것은 실패했다고 정직하게 기록했다.
+      lead: `규칙표 · 파생값 식 · 전략 · 실험 요청의 각 줄에는 그 수치를 <b>어디서 가져왔는지</b>가 함께 적혀 있다.
+             약대생 팀이 하나하나 출처를 추적해 붙였고, 추적에 실패한 것은 실패했다고 정직하게 기록했다.
              엔진은 그 기록(<code class="f1-mono">verification_status</code>)을 읽고 스스로 판단한다.`,
       art: `
         <div class="f1-policy f1-seq">
@@ -462,26 +431,26 @@
             <span class="to">→</span><span class="act"><b>로딩 단계에서 아예 제외</b> — 메모리에 올라오지도 않는다</span></div>
         </div>
         <div class="guide-note warn" style="margin-top:16px">
-          <b>이 정책은 만들어지자마자 우리 자신의 데모를 반려했다.</b><br>
-          원래 이 문서의 예시는 "아세트아미노펜 + 유당 → 갈변"이었다. 그런데 분자 구조를 계산해 보니
-          아세트아미노펜은 아미드라 반응할 아민이 없었다. 두 번째 반려 사유였던 "소아 SLS 10mg 초과"도,
-          출처를 추적해 보니 EMA 기준의 SLS 항목은 <b>경피 투여 전용</b>이고 경구 소아 상한은 존재하지 않아
-          그 행은 <code class="f1-mono">NO_SOURCE_FOUND / NOT_A_RULE</code>로 폐기됐다.
+          <b>원문을 대조하다 고친 값도 있다.</b><br>
+          염/공결정 경계의 ΔpKa 기준은 흔히 인용되는 "±3"이 아니라 원문(Cruz-Cabeza 2012)의
+          <b>−1 / 4</b>이고, Tg 여유의 원래 기준은 약물 단독 Tg가 아니라 <b>고분자와 섞은 뒤의 Tg</b>(Hancock 1994)다.
+          초기 데모의 반려 사유였던 "소아 SLS 10mg 초과"도 출처를 추적해 보니 <b>경피 투여 전용</b> 기준이라
+          <code class="f1-mono">NO_SOURCE_FOUND / NOT_A_RULE</code>로 폐기됐다.
           <b>근거가 없는 판정은 하지 않는다는 원칙이 우리 편의보다 먼저 적용된 셈이고, 그것이 이 프로젝트가
           팔려는 바로 그 가치다.</b>
         </div>`,
       note: `규제 기관을 설득해야 하는 분야에서는 "그럴듯한 규칙이 많은 것"보다
-             <b>"근거 없는 규칙은 안 돌린다"</b>가 훨씬 중요한 자산이라고 판단했다.`,
+             <b>"근거 없는 규칙은 안 돌린다"</b>가 훨씬 중요한 자산이라고 판단했다.
+             새로 추가한 측정 카탈로그·실험 요청·짝이온 pKa 표도 모든 행이 약학 팀 검수 대기 상태로 표시돼 있다.`,
     },
   ];
 
   /* 마지막 단계 끝에 붙는 실행 유도 — 설명이 끝나면 바로 화면을 쓰게 만든다. */
   const CTA = `
     <div class="f1-cta">
-      <p><b>이제 직접 돌려 보세요.</b> 입력줄 아래 <b>시연 시나리오</b> 버튼이 각각 다른 경로를
-        밟습니다 — 규칙이 제약을 반려하는 경우, 인구군에 따라 심사관이 바뀌는 경우 등.<br>
-        트레이스의 규칙 발동을 클릭하면 <b>원본 CSV 행과 출처 문헌</b>이 열리고,
-        오른쪽 <b>Lab-in-the-loop</b>에 실험 결과를 자연어로 넣으면 다음 실험을 지시합니다.</p>
+      <p><b>이제 직접 돌려 보세요.</b> 분자식과 용량만 넣으면 됩니다. 오른쪽 <b>실험 요청 카드</b>에
+        값을 넣거나 건너뛰면 후보가 좁혀지고, 후보 카드의 <b>grounded / provisional</b> 배지가 바뀝니다.<br>
+        트레이스의 규칙 발동을 클릭하면 <b>원본 CSV 행과 출처 문헌</b>이 열립니다.</p>
       <button type="button" id="guide-finish">설명 닫고 실행하기 →</button>
     </div>`;
 
